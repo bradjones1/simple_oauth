@@ -128,6 +128,12 @@ class Oauth2GrantManager extends DefaultPluginManager implements Oauth2GrantMana
 
     $this->checkKeyPaths();
     $salt = Settings::getHashSalt();
+
+    // The hash salt must be at least 32 characters long.
+    if (Core::ourStrlen($salt) < 32) {
+      throw OAuthServerException::serverError('Hash salt must be at least 32 characters long.');
+    }
+
     $server = new AuthorizationServer(
       $this->clientRepository,
       $this->accessTokenRepository,
