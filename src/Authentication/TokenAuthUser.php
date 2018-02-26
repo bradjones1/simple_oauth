@@ -67,17 +67,6 @@ class TokenAuthUser implements TokenAuthUserInterface {
     }, $this->token->get('scopes')->getValue());
   }
 
-  /* ---------------------------------------------------------------------------
-  All the methods below are delegated to the decorated user.
-  --------------------------------------------------------------------------- */
-
-  /**
-   * {@inheritdoc}
-   */
-  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    return $this->subject->access($operation, $account, $return_as_object);
-  }
-
   /**
    * {@inheritdoc}
    */
@@ -88,6 +77,31 @@ class TokenAuthUser implements TokenAuthUserInterface {
     }
 
     return $this->getRoleStorage()->isPermissionInRoles($permission, $this->getRoles());
+  }
+
+  /**
+   * Returns the role storage object.
+   *
+   * @return \Drupal\user\RoleStorageInterface
+   *   The role storage object.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   */
+  protected function getRoleStorage() {
+    /** @var \Drupal\user\RoleStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage('user_role');
+    return $storage;
+  }
+
+  /* ---------------------------------------------------------------------------
+  All the methods below are delegated to the decorated user.
+  --------------------------------------------------------------------------- */
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    return $this->subject->access($operation, $account, $return_as_object);
   }
 
   /**
@@ -854,13 +868,45 @@ class TokenAuthUser implements TokenAuthUserInterface {
   }
 
   /**
-   * Returns the role storage object.
-   *
-   * @return \Drupal\user\RoleStorageInterface
-   *   The role storage object.
+   * {@inheritdoc}
    */
-  protected function getRoleStorage() {
-    return \Drupal::entityTypeManager()->getStorage('user_role');
+  public function wasDefaultRevision() {
+    return $this->subject->wasDefaultRevision();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isLatestRevision() {
+    return $this->subject->isLatestRevision();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isLatestTranslationAffectedRevision() {
+    return $this->subject->isLatestTranslationAffectedRevision();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isRevisionTranslationAffectedEnforced() {
+    return $this->subject->isRevisionTranslationAffectedEnforced();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRevisionTranslationAffectedEnforced($enforced) {
+    return $this->subject->setRevisionTranslationAffectedEnforced($enforced);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isDefaultTranslationAffectedOnly() {
+    return $this->subject->isDefaultTranslationAffectedOnly();
   }
 
 }
