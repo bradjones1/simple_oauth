@@ -7,4 +7,4 @@ configure: oauth2_token.settings
 dependencies:
   - drupal:system (>=8.3)
   - serialization
-  - consumers
+  - consumers (>=8.x-1.0-beta3)
