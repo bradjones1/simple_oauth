@@ -5,6 +5,7 @@ namespace Drupal\simple_oauth_extras\Controller;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
 use Drupal\simple_oauth\Entities\UserEntity;
@@ -37,16 +38,29 @@ class Oauth2AuthorizeController extends ControllerBase {
   protected $formBuilder;
 
   /**
+   * The messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Oauth2AuthorizeController construct.
    *
    * @param \Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface $message_factory
+   *   The PSR-7 converter.
    * @param \Drupal\simple_oauth\Plugin\Oauth2GrantManagerInterface $grant_manager
+   *   The plugin.manager.oauth2_grant.processor service.
    * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
+   *   The form builder.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(HttpMessageFactoryInterface $message_factory, Oauth2GrantManagerInterface $grant_manager, FormBuilderInterface $form_builder) {
+  public function __construct(HttpMessageFactoryInterface $message_factory, Oauth2GrantManagerInterface $grant_manager, FormBuilderInterface $form_builder, MessengerInterface $messenger) {
     $this->messageFactory = $message_factory;
     $this->grantManager = $grant_manager;
     $this->formBuilder = $form_builder;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -56,7 +70,8 @@ class Oauth2AuthorizeController extends ControllerBase {
     return new static(
       $container->get('psr7.http_message_factory'),
       $container->get('plugin.manager.oauth2_grant.processor'),
-      $container->get('form_builder')
+      $container->get('form_builder'),
+      $container->get('messenger')
     );
   }
 
@@ -111,7 +126,7 @@ class Oauth2AuthorizeController extends ControllerBase {
         $auth_request = $server->validateAuthorizationRequest($ps7_request);
       }
       catch (OAuthServerException $exception) {
-        drupal_set_message($this->t('Fatal error. Unable to get the authorization server.'));
+        $this->messenger->addMessage($this->t('Fatal error. Unable to get the authorization server.'));
         watchdog_exception('simple_oauth_extras', $exception);
         return RedirectResponse::create(Url::fromRoute('<front>')->toString());
       }

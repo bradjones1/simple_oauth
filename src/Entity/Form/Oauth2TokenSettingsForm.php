@@ -5,6 +5,7 @@ namespace Drupal\simple_oauth\Entity\Form;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Url;
 use Drupal\simple_oauth\Service\Filesystem\FilesystemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,13 +21,27 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
   protected $fileSystem;
 
   /**
+   * The messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+
+  /**
    * Oauth2TokenSettingsForm constructor.
    *
-   * @param \Drupal\simple_oauth\Service\Filesystem\FilesystemInterface $filesystem
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The factory for configuration objects.
+   * @param \Drupal\simple_oauth\Service\Filesystem\FilesystemInterface $fileSystem
+   *   The simple_oauth.filesystem service.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(ConfigFactoryInterface $configFactory, FilesystemInterface $file_system) {
+  public function __construct(ConfigFactoryInterface $configFactory, FilesystemInterface $fileSystem, MessengerInterface $messenger) {
     parent::__construct($configFactory);
-    $this->fileSystem = $file_system;
+    $this->fileSystem = $fileSystem;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -35,7 +50,8 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('simple_oauth.filesystem')
+      $container->get('simple_oauth.filesystem'),
+      $container->get('messenger')
     );
   }
 
@@ -149,7 +165,7 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
     }
     else {
       // Generate Notice Info Message about enabling openssl extension.
-      drupal_set_message(
+      $this->messenger->addMessage(
         $this->t('Enabling the PHP OpenSSL Extension will permit you generate the keys from this form.'),
         'warning'
       );
