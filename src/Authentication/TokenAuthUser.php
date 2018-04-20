@@ -30,6 +30,13 @@ class TokenAuthUser implements TokenAuthUserInterface {
   protected $token;
 
   /**
+   * The activated consumer instance.
+   *
+   * @var \Drupal\consumers\Entity\Consumer
+   */
+  protected $consumer;
+
+  /**
    * Constructs a TokenAuthUser object.
    *
    * @param \Drupal\simple_oauth\Entity\Oauth2TokenInterface $token
@@ -49,6 +56,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
       throw OAuthServerException::invalidClient();
     }
     $this->token = $token;
+    $this->consumer = $client;
   }
 
   /**
@@ -56,6 +64,13 @@ class TokenAuthUser implements TokenAuthUserInterface {
    */
   public function getToken() {
     return $this->token;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConsumer() {
+      return $this->consumer;
   }
 
   /**
