@@ -86,6 +86,7 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
     $settings->set('refresh_token_expiration', $form_state->getValue('refresh_token_expiration'));
     $settings->set('public_key', $form_state->getValue('public_key'));
     $settings->set('private_key', $form_state->getValue('private_key'));
+    $settings->set('remember_clients', $form_state->getValue('remember_clients'));
     $settings->save();
     parent::submitForm($form, $form_state);
   }
@@ -102,26 +103,24 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
    *   Form definition array.
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $config = $this->config('simple_oauth.settings');
     $form['access_token_expiration'] = [
       '#type' => 'number',
       '#title' => $this->t('Access token expiration time'),
       '#description' => $this->t('The default value, in seconds, to be used as expiration time when creating new tokens.'),
-      '#default_value' => $this->config('simple_oauth.settings')
-        ->get('access_token_expiration'),
+      '#default_value' => $config->get('access_token_expiration'),
     ];
     $form['refresh_token_expiration'] = [
       '#type' => 'number',
       '#title' => $this->t('Refresh token expiration time'),
       '#description' => $this->t('The default value, in seconds, to be used as expiration time when creating new tokens.'),
-      '#default_value' => $this->config('simple_oauth.settings')
-        ->get('refresh_token_expiration'),
+      '#default_value' => $config->get('refresh_token_expiration'),
     ];
     $form['public_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Public Key'),
       '#description' => $this->t('The path to the public key file.'),
-      '#default_value' => $this->config('simple_oauth.settings')
-        ->get('public_key'),
+      '#default_value' => $config->get('public_key'),
       '#element_validate' => ['::validateExistingFile'],
       '#required' => TRUE,
       '#attributes' => ['id' => 'pubk'],
@@ -130,11 +129,17 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Private Key'),
       '#description' => $this->t('The path to the private key file.'),
-      '#default_value' => $this->config('simple_oauth.settings')
-        ->get('private_key'),
+      '#default_value' => $config->get('private_key'),
       '#element_validate' => ['::validateExistingFile'],
       '#required' => TRUE,
       '#attributes' => ['id' => 'pk'],
+    ];
+
+    $form['remember_clients'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Remember previously approved clients'),
+      '#description' => $this->t('When enabled, autorized clients will be stored and a authorization requests for the same client with previously accepted scopes will automatically be accepted.'),
+      '#default_value' => $config->get('remember_clients'),
     ];
 
     $form['actions'] = [

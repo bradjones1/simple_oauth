@@ -95,7 +95,7 @@ class PasswordFunctionalTest extends TokenBearerFunctionalTestBase {
       $response = $this->request('POST', $this->url, [
         'form_params' => $invalid_payload,
       ]);
-      $parsed_response = Json::decode($response->getBody()->getContents());
+      $parsed_response = Json::decode((string) $response->getBody());
       $this->assertSame($value['error'], $parsed_response['error'], sprintf('Correct error code %s for %s.', $value['error'], $key));
       $this->assertSame($value['code'], $response->getStatusCode(), sprintf('Correct status code %d for %s.', $value['code'], $key));
     }
@@ -142,7 +142,7 @@ class PasswordFunctionalTest extends TokenBearerFunctionalTestBase {
       $response = $this->request('POST', $this->url, [
         'form_params' => $invalid_payload,
       ]);
-      $parsed_response = Json::decode($response->getBody()->getContents());
+      $parsed_response = Json::decode((string) $response->getBody());
       $this->assertSame($value['error'], $parsed_response['error'], sprintf('Correct error code %s for %s.', $value['error'], $key));
       $this->assertSame($value['code'], $response->getStatusCode(), sprintf('Correct status code %d for %s.', $value['code'], $key));
     }
