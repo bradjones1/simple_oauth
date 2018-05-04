@@ -30,7 +30,16 @@ class PasswordFunctionalTest extends TokenBearerFunctionalTestBase {
     $response = $this->request('POST', $this->url, [
       'form_params' => $valid_payload,
     ]);
-    $this->assertValidTokenResponse($response, TRUE);
+    $response = $this->assertValidTokenResponse($response, TRUE);
+    // Repeat the request but pass an obtained access token as a header in
+    // order to check the authentication in parallel, which will precede
+    // the creation of a new token.
+    $this->assertValidTokenResponse($this->request('POST', $this->url, [
+      'form_params' => $valid_payload,
+      'headers' => [
+        'Authorization' => 'Bearer ' . $response['access_token'],
+      ],
+    ]), TRUE);
 
     // 2. Test the valid request without scopes.
     $payload_no_scope = $valid_payload;

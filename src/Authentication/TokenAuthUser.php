@@ -46,17 +46,15 @@ class TokenAuthUser implements TokenAuthUserInterface {
    *   When there is no user.
    */
   public function __construct(Oauth2TokenInterface $token) {
+    $this->consumer = $token->get('client')->entity;
+
     if (!$this->subject = $token->get('auth_user_id')->entity) {
-      /** @var \Drupal\consumers\Entity\Consumer $client */
-      if ($client = $token->get('client')->entity) {
-        $this->subject = $client->get('user_id')->entity;
-      }
+      $this->subject = $this->consumer->get('user_id')->entity;
     }
     if (!$this->subject) {
       throw OAuthServerException::invalidClient();
     }
     $this->token = $token;
-    $this->consumer = $client;
   }
 
   /**

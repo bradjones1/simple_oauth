@@ -134,6 +134,9 @@ abstract class TokenBearerFunctionalTestBase extends BrowserTestBase {
    *   The response object.
    * @param bool $has_refresh
    *   TRUE if the response should return a refresh token. FALSE otherwise.
+   *
+   * @return array
+   *   An array representing the response of "/oauth/token".
    */
   protected function assertValidTokenResponse(ResponseInterface $response, $has_refresh = FALSE) {
     $this->assertEquals(200, $response->getStatusCode());
@@ -147,8 +150,10 @@ abstract class TokenBearerFunctionalTestBase extends BrowserTestBase {
       $this->assertNotEmpty($parsed_response['refresh_token']);
     }
     else {
-      $this->assertTrue(empty($parsed_response['refresh_token']));
+      $this->assertFalse(isset($parsed_response['refresh_token']));
     }
+
+    return $parsed_response;
   }
 
 }
