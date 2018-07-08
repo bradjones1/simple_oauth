@@ -82,6 +82,12 @@ class SimpleOauthAuthenticationProvider implements AuthenticationProviderInterfa
 
     $account = new TokenAuthUser($token);
 
+    // Revoke the access token for the blocked user.
+    if ($account->isBlocked()) {
+      $token->revoke();
+      $token->save();
+    }
+
     // Set consumer ID header on successful authentication, so negotiators
     // will trigger correctly.
     $request->headers->set('X-Consumer-ID', $account->getConsumer()->uuid());
