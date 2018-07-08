@@ -2,6 +2,7 @@
 
 namespace Drupal\simple_oauth_extras\Grant;
 
+use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -52,7 +53,7 @@ class ClientCredentialsOverrideGrant extends ClientCredentialsGrant {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
-  protected function getDefaultUser($client) {
+  protected function getDefaultUser(ClientEntityInterface $client) {
     $client_drupal_entities = \Drupal::entityTypeManager()
       ->getStorage('consumer')
       ->loadByProperties([
