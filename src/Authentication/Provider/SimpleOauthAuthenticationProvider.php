@@ -62,6 +62,11 @@ class SimpleOauthAuthenticationProvider implements AuthenticationProviderInterfa
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \League\OAuth2\Server\Exception\OAuthServerException
    */
   public function authenticate(Request $request) {
     // Update the request with the OAuth information.
