@@ -91,6 +91,12 @@ class SimpleOauthAuthenticationProvider implements AuthenticationProviderInterfa
     if ($account->isBlocked()) {
       $token->revoke();
       $token->save();
+      throw OAuthServerException::accessDenied(
+        t(
+          '%name is blocked or has not been activated yet.',
+          ['%name' => $account->getAccountName()]
+        )
+      );
     }
 
     // Set consumer ID header on successful authentication, so negotiators
