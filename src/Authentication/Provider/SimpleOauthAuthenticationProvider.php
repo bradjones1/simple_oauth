@@ -88,7 +88,7 @@ class SimpleOauthAuthenticationProvider implements AuthenticationProviderInterfa
     $account = new TokenAuthUser($token);
 
     // Revoke the access token for the blocked user.
-    if ($account->isBlocked()) {
+    if ($account->isBlocked() && $account->isAuthenticated()) {
       $token->revoke();
       $token->save();
       throw OAuthServerException::accessDenied(
