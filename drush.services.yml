@@ -1,0 +1,4 @@
+services:
+  Drupal\simple_oauth\Commands\SimpleOauthCommands:
+    tags:
+      - { name: drush.command }
