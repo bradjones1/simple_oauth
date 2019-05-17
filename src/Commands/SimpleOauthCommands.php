@@ -10,6 +10,19 @@ use Drush\Commands\DrushCommands;
 class SimpleOauthCommands extends DrushCommands {
 
   /**
+   * Checks whether the give uri is a directory, without throwing errors.
+   *
+   * @param string $uri
+   *   The uri to check.
+   *
+   * @return bool
+   *   TRUE if it's a directory. FALSE otherwise.
+   */
+  private function isDirectory($uri) {
+    return @is_dir($uri);
+  }
+
+  /**
    * Generate Oauth2 Keys.
    *
    * @param string $keypath
@@ -29,7 +42,7 @@ class SimpleOauthCommands extends DrushCommands {
     $file_system = \Drupal::service('file_system');
 
     $relative_path = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $dir_name;
-    if (!$file_system->isDirectory($relative_path)) {
+    if (!$this->isDirectory($relative_path)) {
       $file_system->mkdir($relative_path);
     }
     $keys_path = $file_system->realpath($relative_path);
