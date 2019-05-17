@@ -2,12 +2,38 @@
 
 namespace Drupal\simple_oauth\Commands;
 
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\simple_oauth\Service\Exception\ExtensionNotLoadedException;
+use Drupal\simple_oauth\Service\Exception\FilesystemValidationException;
+use Drupal\simple_oauth\Service\KeyGeneratorService;
 use Drush\Commands\DrushCommands;
 
 /**
  * Drush commands for Simple OAuth.
  */
-class SimpleOauthCommands extends DrushCommands {
+final class SimpleOauthCommands extends DrushCommands {
+
+  /**
+   * The key generator.
+   *
+   * @var \Drupal\simple_oauth\Service\KeyGeneratorService
+   */
+  private $keygen;
+
+  /**
+   * The file system.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  private $fileSystem;
+
+  /**
+   * SimpleOauthCommands constructor.
+   */
+  public function __construct(KeyGeneratorService $keygen, FileSystemInterface $file_system) {
+    $this->keygen = $keygen;
+    $this->fileSystem = $file_system;
+  }
 
   /**
    * Checks whether the give uri is a directory, without throwing errors.
@@ -26,28 +52,35 @@ class SimpleOauthCommands extends DrushCommands {
    * Generate Oauth2 Keys.
    *
    * @param string $keypath
-   *   The path were the key files will be saved.
+   *   The full path were the key files will be saved.
+   *
+   * @usage simple-oauth:generate-keys /var/www/drupal-example.org/keys
+   *   Creates the keys in the /var/www/drupal-example.org/keys directory.
    *
    * @command simple-oauth:generate-keys
+   * @aliases so:generate-keys, sogk
    *
    * @validate-module-enabled simple_oauth
-   *
-   * @aliases so:generate-keys, sogk
    */
   public function generateKeys($keypath) {
-    $dir_name = $keypath;
-    /** @var \Drupal\simple_oauth\Service\KeyGeneratorService $key_gen */
-    $key_gen = \Drupal::service('simple_oauth.key.generator');
-    /** @var \Symfony\Component\Filesystem\Filesystem $file_system */
-    $file_system = \Drupal::service('file_system');
-
-    $relative_path = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $dir_name;
-    if (!$this->isDirectory($relative_path)) {
-      $file_system->mkdir($relative_path);
+    if (!$this->isDirectory($keypath)) {
+      $this->fileSystem->mkdir($keypath);
     }
-    $keys_path = $file_system->realpath($relative_path);
+    $keys_path = $this->fileSystem->realpath($keypath);
 
-    $key_gen->generateKeys($keys_path);
+    try {
+      $this->keygen->generateKeys($keys_path);
+      $this->logger()->notice(
+        'Keys successfully generated at {path}.',
+        ['path' => $keypath]
+      );
+    }
+    catch (FilesystemValidationException $e) {
+      $this->logger()->error($e->getMessage());
+    }
+    catch (ExtensionNotLoadedException $e) {
+      $this->logger()->error($e->getMessage());
+    }
   }
 
 }
