@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Plugin\Oauth2Grant;
+namespace Drupal\simple_oauth\Plugin\Oauth2Grant;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\simple_oauth\Plugin\Oauth2GrantBase;
@@ -10,6 +10,8 @@ use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * The authorization code grant plugin.
+ *
  * @Oauth2Grant(
  *   id = "authorization_code",
  *   label = @Translation("Authorization Code")
@@ -18,16 +20,22 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class AuthorizationCode extends Oauth2GrantBase {
 
   /**
+   * The authorization code repository.
+   *
    * @var \League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface
    */
   protected $authCodeRepository;
 
   /**
+   * The refresh token repository.
+   *
    * @var \League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface
    */
   protected $refreshTokenRepository;
 
   /**
+   * The expiration for the code.
+   *
    * @var \DateTime
    */
   protected $authCodeExpiration;
@@ -40,8 +48,9 @@ class AuthorizationCode extends Oauth2GrantBase {
     $settings = $config_factory->get('simple_oauth.settings');
     $this->authCodeRepository = $auth_code_repository;
     $this->refreshTokenRepository = $refresh_token_repository;
-    // TODO: Make this configurable and not just the same as the access toke expiration.
-    $this->authCodeExpiration = new \DateInterval(sprintf('PT%dS', $settings->get('access_token_expiration')));
+    $this->authCodeExpiration = new \DateInterval(
+      sprintf('PT%dS', $settings->get('access_token_expiration'))
+    );
   }
 
   /**
@@ -52,7 +61,7 @@ class AuthorizationCode extends Oauth2GrantBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('simple_oauth_extras.repositories.auth_code'),
+      $container->get('simple_oauth.repositories.auth_code'),
       $container->get('simple_oauth.repositories.refresh_token'),
       $container->get('config.factory')
     );

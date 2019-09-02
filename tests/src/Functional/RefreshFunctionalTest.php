@@ -1,22 +1,22 @@
 <?php
 
-namespace Drupal\Tests\simple_oauth_extras\Functional;
+namespace Drupal\Tests\simple_oauth\Functional;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\Tests\simple_oauth\Functional\TokenBearerFunctionalTestBase;
 use League\OAuth2\Server\CryptTrait;
 
 /**
- * @group simple_oauth_extras
+ * The refresh tests.
+ *
+ * @group simple_oauth
  */
 class RefreshFunctionalTest extends TokenBearerFunctionalTestBase {
 
   use CryptTrait;
 
-  public static $modules = [
-    'simple_oauth_extras',
-  ];
   /**
+   * The refresh token.
+   *
    * @var string
    */
   protected $refreshToken;

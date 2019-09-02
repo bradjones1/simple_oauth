@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Plugin\Oauth2Grant;
+namespace Drupal\simple_oauth\Plugin\Oauth2Grant;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\simple_oauth\Plugin\Oauth2GrantBase;
@@ -9,6 +9,8 @@ use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * The refresh token grant plugin.
+ *
  * @Oauth2Grant(
  *   id = "refresh_token",
  *   label = @Translation("Refresh Token")
@@ -17,6 +19,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class RefreshToken extends Oauth2GrantBase {
 
   /**
+   * The refresh token repository.
+   *
    * @var \League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface
    */
   protected $refreshTokenRepository;

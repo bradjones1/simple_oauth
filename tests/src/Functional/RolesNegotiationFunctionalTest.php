@@ -1,58 +1,75 @@
 <?php
 
-namespace Drupal\Tests\simple_oauth_extras\Functional;
+namespace Drupal\Tests\simple_oauth\Functional;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\Core\Url;
 use Drupal\consumers\Entity\Consumer;
+use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\simple_oauth\Functional\RequestHelperTrait;
-use Drupal\Tests\simple_oauth\Functional\SimpleOauthTestTrait;
 use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
 
 /**
- * @group simple_oauth_extras
+ * Tests for the roles negotiation.
+ *
+ * @group simple_oauth
  */
 class RolesNegotiationFunctionalTest extends BrowserTestBase {
 
   use RequestHelperTrait;
   use SimpleOauthTestTrait;
 
+  /**
+   * {@inheritdoc}
+   */
   public static $modules = [
-    'image',
+    'node',
+    'serialization',
     'simple_oauth',
-    'simple_oauth_extras',
+    'image',
     'text',
     'user',
   ];
 
   /**
+   * The URL.
+   *
    * @var \Drupal\Core\Url
    */
   protected $url;
 
   /**
+   * The URL for the token test.
+   *
    * @var \Drupal\Core\Url
    */
   protected $tokenTestUrl;
 
   /**
+   * The client entity.
+   *
    * @var \Drupal\consumers\Entity\Consumer
    */
   protected $client;
 
   /**
+   * The user entity.
+   *
    * @var \Drupal\user\UserInterface
    */
   protected $user;
 
 
   /**
+   * The HTTP client.
+   *
    * @var \GuzzleHttp\ClientInterface
    */
   protected $httpClient;
 
   /**
+   * The client secret.
+   *
    * @var string
    */
   protected $clientSecret;
@@ -76,6 +93,14 @@ class RolesNegotiationFunctionalTest extends BrowserTestBase {
       'label' => 'Foo',
       'is_admin' => FALSE,
     ]);
+    $this->grantPermissions(
+      Role::load(RoleInterface::ANONYMOUS_ID),
+      ['debug simple_oauth tokens']
+    );
+    $this->grantPermissions(
+      Role::load(RoleInterface::AUTHENTICATED_ID),
+      ['debug simple_oauth tokens']
+    );
     $role->grantPermission('view own simple_oauth entities');
     $role->save();
     $role = Role::create([

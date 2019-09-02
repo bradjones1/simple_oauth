@@ -1,43 +1,48 @@
 <?php
 
-namespace Drupal\Tests\simple_oauth_extras\Functional;
+namespace Drupal\Tests\simple_oauth\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Tests\simple_oauth\Functional\TokenBearerFunctionalTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
 /**
- * @group simple_oauth_extras
+ * The implicit tests.
+ *
+ * @group simple_oauth
  */
 class ImplicitFunctionalTest extends TokenBearerFunctionalTestBase {
 
   /**
+   * The authorize URL.
+   *
    * @var \Drupal\Core\Url
    */
   protected $authorizeUrl;
 
   /**
+   * The redirect URI.
+   *
    * @var string
    */
   protected $redirectUri;
 
-  public static $modules = [
-    'simple_oauth_extras',
-    'simple_oauth_extras_test',
-  ];
+  /**
+   * {@inheritdoc}
+   */
+  public static $modules = ['simple_oauth_test'];
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
-    $this->redirectUri = Url::fromRoute('oauth2_token_extras.test_token', [], [
+    $this->redirectUri = Url::fromRoute('oauth2_token.test_token', [], [
       'absolute' => TRUE,
     ])->toString();
     $this->client->set('redirect', $this->redirectUri);
     $this->client->save();
-    $this->authorizeUrl = Url::fromRoute('oauth2_token_extras.authorize');
+    $this->authorizeUrl = Url::fromRoute('oauth2_token.authorize');
     $this->grantPermissions(Role::load(RoleInterface::AUTHENTICATED_ID), [
       'grant simple_oauth codes',
     ]);
@@ -58,7 +63,6 @@ class ImplicitFunctionalTest extends TokenBearerFunctionalTestBase {
     ]);
     $assert_session = $this->assertSession();
     $assert_session->buttonExists('Log in');
-    $assert_session->responseContains('An external client application is requesting access');
 
     // 2. Log the user in and try again.
     $this->drupalLogin($this->user);
@@ -68,7 +72,7 @@ class ImplicitFunctionalTest extends TokenBearerFunctionalTestBase {
     $assert_session = $this->assertSession();
     $assert_session->statusCodeEquals(500);
     $this
-      ->config('simple_oauth_extras.settings')
+      ->config('simple_oauth.settings')
       ->set('use_implicit', TRUE)
       ->save();
     $this->drupalGet($this->authorizeUrl->toString(), [
@@ -106,7 +110,6 @@ class ImplicitFunctionalTest extends TokenBearerFunctionalTestBase {
     ]);
     $assert_session = $this->assertSession();
     $assert_session->buttonExists('Log in');
-    $assert_session->responseContains('An external client application is requesting access');
 
     // 2. Log the user in and try again.
     $this->drupalLogin($this->user);
@@ -116,7 +119,7 @@ class ImplicitFunctionalTest extends TokenBearerFunctionalTestBase {
     $assert_session = $this->assertSession();
     $assert_session->responseContains('Fatal error. Unable to get the authorization server.');
     $this
-      ->config('simple_oauth_extras.settings')
+      ->config('simple_oauth.settings')
       ->set('use_implicit', TRUE)
       ->save();
     $this->drupalGet($this->authorizeUrl->toString(), [

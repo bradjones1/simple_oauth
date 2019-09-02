@@ -1,18 +1,21 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Grant;
+namespace Drupal\simple_oauth\Grant;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * Injects the user information in the client credentials token.
+ */
 class ClientCredentialsOverrideGrant extends ClientCredentialsGrant {
 
   /**
    * {@inheritdoc}
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
    * @throws \League\OAuth2\Server\Exception\OAuthServerException
    * @throws \League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException
    */
@@ -51,7 +54,7 @@ class ClientCredentialsOverrideGrant extends ClientCredentialsGrant {
    * @return \Drupal\user\Entity\User
    *   The default user.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   protected function getDefaultUser(ClientEntityInterface $client) {
     $client_drupal_entities = \Drupal::entityTypeManager()

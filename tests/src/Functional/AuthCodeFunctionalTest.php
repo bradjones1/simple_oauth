@@ -1,50 +1,57 @@
 <?php
 
-namespace Drupal\Tests\simple_oauth_extras\Functional;
+namespace Drupal\Tests\simple_oauth\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Tests\simple_oauth\Functional\TokenBearerFunctionalTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
 /**
- * @group simple_oauth_extras
+ * The auth code test.
+ *
+ * @group simple_oauth
  */
 class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
 
   /**
+   * The authorize URL.
+   *
    * @var \Drupal\Core\Url
    */
   protected $authorizeUrl;
 
   /**
+   * The redirect URI.
+   *
    * @var string
    */
   protected $redirectUri;
 
   /**
+   * An extra role for testing.
+   *
    * @var \Drupal\user\RoleInterface
    */
   protected $extraRole;
 
-  public static $modules = [
-    'simple_oauth_extras',
-    'simple_oauth_extras_test',
-  ];
+  /**
+   * {@inheritdoc}
+   */
+  public static $modules = ['simple_oauth_test'];
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
-    $this->redirectUri = Url::fromRoute('oauth2_token_extras.test_token', [], [
+    $this->redirectUri = Url::fromRoute('oauth2_token.test_token', [], [
       'absolute' => TRUE,
     ])->toString();
     $this->client->set('redirect', $this->redirectUri);
     $this->client->set('description', $this->getRandomGenerator()
       ->paragraphs());
     $this->client->save();
-    $this->authorizeUrl = Url::fromRoute('oauth2_token_extras.authorize');
+    $this->authorizeUrl = Url::fromRoute('oauth2_token.authorize');
     $this->grantPermissions(Role::load(RoleInterface::AUTHENTICATED_ID), [
       'grant simple_oauth codes',
     ]);
@@ -82,7 +89,6 @@ class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
     ]);
     $assert_session = $this->assertSession();
     $assert_session->buttonExists('Log in');
-    $assert_session->responseContains('An external client application is requesting access');
 
     // 2. Log the user in and try again.
     $this->drupalLogin($this->user);
@@ -121,7 +127,6 @@ class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
     ]);
     $assert_session = $this->assertSession();
     $assert_session->buttonExists('Log in');
-    $assert_session->responseContains('An external client application is requesting access');
 
     // 2. Log the user in and try again. This time we should get a code
     // immediately without granting, because the consumer is not 3rd party.
@@ -156,7 +161,6 @@ class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
     ]);
     $assert_session = $this->assertSession();
     $assert_session->buttonExists('Log in');
-    $assert_session->responseContains('An external client application is requesting access');
 
     // 2. Log the user in and try again.
     $this->drupalLogin($this->user);
@@ -198,20 +202,26 @@ class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
 
     $code = $this->getAndValidateCodeFromResponse();
 
-    $response = $this->postGrantedCodeWithScopes($code, $this->scope . ' ' . $this->extraRole->id());
+    $response = $this->postGrantedCodeWithScopes(
+      $code, $this->scope . ' ' . $this->extraRole->id()
+    );
     $this->assertValidTokenResponse($response, TRUE);
 
-    // Do another request with the additional scope, this scope is now remembered too.
+    // Do another request with the additional scope, this scope is now
+    // remembered too.
     $valid_params['scope'] = $this->extraRole->id();
     $this->drupalGet($this->authorizeUrl->toString(), [
       'query' => $valid_params,
     ]);
     $code = $this->getAndValidateCodeFromResponse();
 
-    $response = $this->postGrantedCodeWithScopes($code, $this->scope . ' ' . $this->extraRole->id());
+    $response = $this->postGrantedCodeWithScopes(
+      $code, $this->scope . ' ' . $this->extraRole->id()
+    );
     $this->assertValidTokenResponse($response, TRUE);
 
-    // Disable the remember clients feature, make sure that the redirect doesn't happen automatically anymore.
+    // Disable the remember clients feature, make sure that the redirect doesn't
+    // happen automatically anymore.
     $this->config('simple_oauth.settings')
       ->set('remember_clients', FALSE)
       ->save();
@@ -241,6 +251,7 @@ class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
    * Get the code in the response after granting access to scopes.
    *
    * @return mixed
+   *   The code.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
    */

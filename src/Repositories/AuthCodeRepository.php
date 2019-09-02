@@ -1,18 +1,37 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Repositories;
+namespace Drupal\simple_oauth\Repositories;
 
-use Drupal\simple_oauth\Repositories\RevocableTokenRepositoryTrait;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
 
+/**
+ * The repository for the Auth Code grant.
+ */
 class AuthCodeRepository implements AuthCodeRepositoryInterface {
 
   use RevocableTokenRepositoryTrait;
 
-  protected static $bundle_id = 'auth_code';
-  protected static $entity_class = 'Drupal\simple_oauth_extras\Entities\AuthCodeEntity';
-  protected static $entity_interface = 'League\OAuth2\Server\Entities\AuthCodeEntityInterface';
+  /**
+   * The bundle ID.
+   *
+   * @var string
+   */
+  protected static $bundleId = 'auth_code';
+
+  /**
+   * The OAuth2 entity class name.
+   *
+   * @var string
+   */
+  protected static $entityClass = 'Drupal\simple_oauth\Entities\AuthCodeEntity';
+
+  /**
+   * The OAuth2 entity interface name.
+   *
+   * @var string
+   */
+  protected static $entityInterface = 'League\OAuth2\Server\Entities\AuthCodeEntityInterface';
 
   /**
    * {@inheritdoc}

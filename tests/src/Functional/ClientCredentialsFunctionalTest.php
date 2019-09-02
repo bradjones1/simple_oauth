@@ -1,18 +1,15 @@
 <?php
 
-namespace Drupal\Tests\simple_oauth_extras\Functional;
+namespace Drupal\Tests\simple_oauth\Functional;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\Tests\simple_oauth\Functional\TokenBearerFunctionalTestBase;
 
 /**
- * @group simple_oauth_extras
+ * The client credentials test.
+ *
+ * @group simple_oauth
  */
 class ClientCredentialsFunctionalTest extends TokenBearerFunctionalTestBase {
-
-  public static $modules = [
-    'simple_oauth_extras',
-  ];
 
   /**
    * Test the valid ClientCredentials grant.

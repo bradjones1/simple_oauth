@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Controller;
+namespace Drupal\simple_oauth\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\user\PermissionHandlerInterface;
@@ -8,9 +8,14 @@ use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * The controller for the debug route.
+ */
 class DebugController extends ControllerBase {
 
   /**
+   * The user permissions.
+   *
    * @var \Drupal\user\PermissionHandlerInterface
    */
   protected $userPermissions;
@@ -19,6 +24,7 @@ class DebugController extends ControllerBase {
    * Oauth2Token constructor.
    *
    * @param \Drupal\user\PermissionHandlerInterface $user_permissions
+   *   The user permissions.
    */
   public function __construct(PermissionHandlerInterface $user_permissions) {
     $this->userPermissions = $user_permissions;

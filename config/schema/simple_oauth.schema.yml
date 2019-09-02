@@ -42,3 +42,7 @@ simple_oauth.settings:
     remember_clients:
       type: boolean
       label: 'Remember clients'
+    use_implicit:
+      type: boolean
+      label: 'Enable the implicit grant?'
+      description: 'Only use the implicit grant if you understand the security implications of using it.'

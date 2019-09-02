@@ -1,8 +1,10 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Plugin\Oauth2Grant;
+namespace Drupal\simple_oauth\Plugin\Oauth2Grant;
 
 /**
+ * The autorization code grant plugin.
+ *
  * @Oauth2Grant(
  *   id = "code",
  *   label = @Translation("Code")

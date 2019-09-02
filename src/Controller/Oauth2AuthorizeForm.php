@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Controller;
+namespace Drupal\simple_oauth\Controller;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -20,26 +20,36 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Oauth2AuthorizeForm extends FormBase {
 
   /**
+   * The entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * The message factory.
+   *
    * @var \Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface
    */
   protected $messageFactory;
 
   /**
+   * The foundation factory.
+   *
    * @var \Symfony\Bridge\PsrHttpMessage\HttpFoundationFactoryInterface
    */
   protected $foundationFactory;
 
   /**
+   * The authorization server.
+   *
    * @var \League\OAuth2\Server\AuthorizationServer
    */
   protected $server;
 
   /**
+   * The grant plugin manager.
+   *
    * @var \Drupal\simple_oauth\Plugin\Oauth2GrantManagerInterface
    */
   protected $grantManager;

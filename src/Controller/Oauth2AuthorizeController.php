@@ -1,13 +1,11 @@
 <?php
 
-namespace Drupal\simple_oauth_extras\Controller;
+namespace Drupal\simple_oauth\Controller;
 
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Form\FormBuilderInterface;
-use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -30,26 +28,18 @@ use Symfony\Component\HttpFoundation\Request;
 class Oauth2AuthorizeController extends ControllerBase {
 
   /**
+   * The message factory.
+   *
    * @var \Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface
    */
   protected $messageFactory;
 
   /**
+   * The grant manager.
+   *
    * @var \Drupal\simple_oauth\Plugin\Oauth2GrantManagerInterface
    */
   protected $grantManager;
-
-  /**
-   * @var \Drupal\Core\Form\FormBuilderInterface
-   */
-  protected $formBuilder;
-
-  /**
-   * The messenger service.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
 
   /**
    * The config factory.
@@ -72,20 +62,19 @@ class Oauth2AuthorizeController extends ControllerBase {
    *   The PSR-7 converter.
    * @param \Drupal\simple_oauth\Plugin\Oauth2GrantManagerInterface $grant_manager
    *   The plugin.manager.oauth2_grant.processor service.
-   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
-   *   The form builder.
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   The messenger service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    * @param \Drupal\simple_oauth\KnownClientsRepositoryInterface $known_clients_repository
    *   The known client repository service.
    */
-  public function __construct(HttpMessageFactoryInterface $message_factory, Oauth2GrantManagerInterface $grant_manager, FormBuilderInterface $form_builder, MessengerInterface $messenger, ConfigFactoryInterface $config_factory, KnownClientsRepositoryInterface $known_clients_repository) {
+  public function __construct(
+    HttpMessageFactoryInterface $message_factory,
+    Oauth2GrantManagerInterface $grant_manager,
+    ConfigFactoryInterface $config_factory,
+    KnownClientsRepositoryInterface $known_clients_repository
+  ) {
     $this->messageFactory = $message_factory;
     $this->grantManager = $grant_manager;
-    $this->formBuilder = $form_builder;
-    $this->messenger = $messenger;
     $this->configFactory = $config_factory;
     $this->knownClientRepository = $known_clients_repository;
   }
@@ -97,8 +86,6 @@ class Oauth2AuthorizeController extends ControllerBase {
     return new static(
       $container->get('psr7.http_message_factory'),
       $container->get('plugin.manager.oauth2_grant.processor'),
-      $container->get('form_builder'),
-      $container->get('messenger'),
       $container->get('config.factory'),
       $container->get('simple_oauth.known_clients')
     );
@@ -112,6 +99,8 @@ class Oauth2AuthorizeController extends ControllerBase {
    *
    * @return mixed
    *   The response.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function authorize(Request $request) {
     $client_uuid = $request->get('client_id');
@@ -123,7 +112,7 @@ class Oauth2AuthorizeController extends ControllerBase {
       $consumer_storage = $this->entityTypeManager()->getStorage('consumer');
     }
     catch (InvalidPluginDefinitionException $exception) {
-      watchdog_exception('simple_oauth_extras', $exception);
+      watchdog_exception('simple_oauth', $exception);
       return RedirectResponse::create(Url::fromRoute('<front>')->toString());
     }
     $client_drupal_entities = $consumer_storage
@@ -144,9 +133,10 @@ class Oauth2AuthorizeController extends ControllerBase {
     }
 
     if ($this->currentUser()->isAnonymous()) {
-      $this->messenger->addStatus($this->t('An external client application is requesting access to your data in this site. Please log in first to authorize the operation.'));
+      $message = $this->t('An external client application is requesting access to your data in this site. Please log in first to authorize the operation.');
+      $this->messenger()->addStatus($message);
       // If the user is not logged in.
-      $destination = Url::fromRoute('oauth2_token_extras.authorize', [], [
+      $destination = Url::fromRoute('oauth2_token.authorize', [], [
         'query' => UrlHelper::parse('/?' . $request->getQueryString())['query'],
       ]);
       $url = Url::fromRoute('user.login', [], [
@@ -173,8 +163,8 @@ class Oauth2AuthorizeController extends ControllerBase {
         $auth_request = $server->validateAuthorizationRequest($ps7_request);
       }
       catch (OAuthServerException $exception) {
-        $this->messenger->addMessage($this->t('Fatal error. Unable to get the authorization server.'));
-        watchdog_exception('simple_oauth_extras', $exception);
+        $this->messenger()->addError($this->t('Fatal error. Unable to get the authorization server.'));
+        watchdog_exception('simple_oauth', $exception);
         return RedirectResponse::create(Url::fromRoute('<front>')->toString());
       }
       if ($auth_request) {
@@ -188,7 +178,7 @@ class Oauth2AuthorizeController extends ControllerBase {
         );
       }
     }
-    return $this->formBuilder->getForm('Drupal\simple_oauth_extras\Controller\Oauth2AuthorizeForm');
+    return $this->formBuilder()->getForm(Oauth2AuthorizeForm::class);
   }
 
   /**

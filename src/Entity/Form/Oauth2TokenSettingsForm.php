@@ -97,6 +97,7 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
     $settings->set('public_key', $form_state->getValue('public_key'));
     $settings->set('private_key', $form_state->getValue('private_key'));
     $settings->set('remember_clients', $form_state->getValue('remember_clients'));
+    $settings->set('use_implicit', $form_state->getValue('use_implicit'));
     $settings->save();
     parent::submitForm($form, $form_state);
   }
@@ -191,6 +192,12 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
         'warning'
       );
     }
+    $form['use_implicit'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable the implicit grant?'),
+      '#description' => t('The implicit grant has the potential to be used in an insecure way. Only enable this if you understand the risks. See https://tools.ietf.org/html/rfc6819#section-4.4.2 for more information.'),
+      '#default_value' => \Drupal::config('simple_oauth.settings')->get('use_implicit'),
+    ];
 
     return parent::buildForm($form, $form_state);
   }
