@@ -92,6 +92,7 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $settings = $this->config('simple_oauth.settings');
     $settings->set('access_token_expiration', $form_state->getValue('access_token_expiration'));
+    $settings->set('authorization_code_expiration', $form_state->getValue('authorization_code_expiration'));
     $settings->set('refresh_token_expiration', $form_state->getValue('refresh_token_expiration'));
     $settings->set('token_cron_batch_size', $form_state->getValue('token_cron_batch_size'));
     $settings->set('public_key', $form_state->getValue('public_key'));
@@ -120,6 +121,14 @@ class Oauth2TokenSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Access token expiration time'),
       '#description' => $this->t('The default value, in seconds, to be used as expiration time when creating new tokens.'),
       '#default_value' => $config->get('access_token_expiration'),
+    ];
+    $form['authorization_code_expiration'] = [
+      '#type' => 'number',
+      '#title' => t('Authorization code expiration time'),
+      '#description' => t('The default value, in seconds, to be used as expiration time when creating new authorization codes. If you are not sure about this value, use the same value as above for <em>Access token expiration time</em>.'),
+      '#default_value' => \Drupal::config('simple_oauth.settings')
+        ->get('authorization_code_expiration'),
+      '#weight' => 0,
     ];
     $form['refresh_token_expiration'] = [
       '#type' => 'number',

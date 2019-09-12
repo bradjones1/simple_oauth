@@ -14,3 +14,13 @@ function simple_oauth_update_8001() {
     ->set('token_cron_batch_size', 0)
     ->save();
 }
+
+/**
+ * Define the default authorization code expiration value.
+ */
+function simple_oauth_update_8401() {
+  \Drupal::configFactory()
+    ->getEditable('simple_oauth.settings')
+    ->set('authorization_code_expiration', 300)
+    ->save();
+}
