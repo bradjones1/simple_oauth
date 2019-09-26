@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\simple_oauth\Functional;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
@@ -231,6 +232,59 @@ class AuthCodeFunctionalTest extends TokenBearerFunctionalTestBase {
     ]);
 
     $this->assertGrantForm();
+  }
+
+  /**
+   * Test the AuthCode grant with PKCE.
+   */
+  public function testClientAuthCodeGrantWithPkce() {
+    $this->client->set('pkce', TRUE);
+    $this->client->set('confidential', FALSE);
+    $this->client->save();
+
+    // For PKCE flow we need a code verifier and a code challenge.
+    // @see https://tools.ietf.org/html/rfc7636 for details.
+    $code_verifier = self::base64urlencode(Crypt::randomBytes(64));
+    $code_challenge = self::base64urlencode(hash('sha256', $code_verifier, TRUE));
+
+    $valid_params = [
+      'response_type' => 'code',
+      'client_id' => $this->client->uuid(),
+      'code_challenge' => $code_challenge,
+      'code_challenge_method' => 'S256',
+    ];
+
+    // 1. Anonymous request redirect to log in.
+    $this->drupalGet($this->authorizeUrl->toString(), [
+      'query' => $valid_params,
+    ]);
+    $assert_session = $this->assertSession();
+    $assert_session->buttonExists('Log in');
+
+    // 2. Logged in user gets the grant form.
+    $this->drupalLogin($this->user);
+    $this->drupalGet($this->authorizeUrl->toString(), [
+      'query' => $valid_params,
+    ]);
+    $this->assertGrantForm();
+
+    // 3. Grant access by submitting the form.
+    $this->drupalPostForm(NULL, [], 'Grant');
+
+    // Store the code for the second part of the flow.
+    $code = $this->getAndValidateCodeFromResponse();
+
+    // Request the access and refresh token.
+    $valid_payload = [
+      'grant_type' => 'authorization_code',
+      'client_id' => $this->client->uuid(),
+      'code_verifier' => $code_verifier,
+      'scope' => $this->scope . ' ' . $this->extraRole->id(),
+      'code' => $code,
+      'redirect_uri' => $this->redirectUri,
+    ];
+    $response = $this->post($this->url, $valid_payload);
+    $this->assertValidTokenResponse($response, TRUE);
   }
 
   /**

@@ -143,9 +143,19 @@ class Oauth2AuthorizeForm extends FormBase {
     else {
       $grant_type = NULL;
     }
+    $client_uuid = $request->get('client_id');
+    $consumer_storage = $this->entityTypeManager->getStorage('consumer');
+    $client_drupal_entities = $consumer_storage
+      ->loadByProperties([
+        'uuid' => $client_uuid,
+      ]);
+    if (empty($client_drupal_entities)) {
+      throw OAuthServerException::invalidClient();
+    }
+    $client_drupal_entity = reset($client_drupal_entities);
     $this->server = $this
       ->grantManager
-      ->getAuthorizationServer($grant_type);
+      ->getAuthorizationServer($grant_type, $client_drupal_entity);
 
     // Transform the HTTP foundation request object into a PSR-7 object. The
     // OAuth library expects a PSR-7 request.
@@ -161,15 +171,6 @@ class Oauth2AuthorizeForm extends FormBase {
     $form = [
       '#type' => 'container',
     ];
-
-    $client_uuid = $request->get('client_id');
-    $client_drupal_entities = $manager->getStorage('consumer')->loadByProperties([
-      'uuid' => $client_uuid,
-    ]);
-    if (empty($client_drupal_entities)) {
-      throw OAuthServerException::invalidClient();
-    }
-    $client_drupal_entity = reset($client_drupal_entities);
 
     $cacheablity_metadata = new CacheableMetadata();
 

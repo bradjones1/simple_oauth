@@ -2,7 +2,6 @@
 
 namespace Drupal\simple_oauth\Controller;
 
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
@@ -108,13 +107,7 @@ class Oauth2AuthorizeController extends ControllerBase {
       return OAuthServerException::invalidClient()
         ->generateHttpResponse(new Response());
     }
-    try {
-      $consumer_storage = $this->entityTypeManager()->getStorage('consumer');
-    }
-    catch (InvalidPluginDefinitionException $exception) {
-      watchdog_exception('simple_oauth', $exception);
-      return RedirectResponse::create(Url::fromRoute('<front>')->toString());
-    }
+    $consumer_storage = $this->entityTypeManager()->getStorage('consumer');
     $client_drupal_entities = $consumer_storage
       ->loadByProperties([
         'uuid' => $client_uuid,
@@ -158,7 +151,7 @@ class Oauth2AuthorizeController extends ControllerBase {
         $grant_type = NULL;
       }
       try {
-        $server = $this->grantManager->getAuthorizationServer($grant_type);
+        $server = $this->grantManager->getAuthorizationServer($grant_type, $client_drupal_entity);
         $ps7_request = $this->messageFactory->createRequest($request);
         $auth_request = $server->validateAuthorizationRequest($ps7_request);
       }

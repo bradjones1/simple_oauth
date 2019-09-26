@@ -131,6 +131,19 @@ function simple_oauth_entity_base_field_info(EntityTypeInterface $entity_type) {
           'placeholder' => '',
         ],
       ]);
+
+    $fields['pkce'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(new TranslatableMarkup('Use PKCE?'))
+      ->setDescription(new TranslatableMarkup('A boolean indicating whether the client uses @pkce (e.g., a native client or SPA)'))
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'type' => 'boolean',
+        'weight' => 3,
+      ])
+      ->setDisplayOptions('form', ['weight' => 3])
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDefaultValue(FALSE);
   }
   return $fields;
 }
@@ -169,6 +182,11 @@ function simple_oauth_form_consumer_form_alter(array &$form, FormStateInterface 
     '#type' => 'password',
     '#title' => t('New Secret'),
     '#description' => $description,
+  ];
+  $form['pkce']['#states']['visible'] = [
+    ':input[name="confidential[value]"]' => [
+      'checked' => FALSE,
+    ],
   ];
 }
 
