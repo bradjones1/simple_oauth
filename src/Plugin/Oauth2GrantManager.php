@@ -156,8 +156,8 @@ class Oauth2GrantManager extends DefaultPluginManager implements Oauth2GrantMana
     if ($client && ($grant instanceof AuthCodeGrant)) {
       $client_has_pkce_enabled = $client->hasField('pkce')
         && $client->get('pkce')->first()->value;
-      if($client_has_pkce_enabled){
-        $grant->enableCodeExchangeProof();
+      if(!$client_has_pkce_enabled){
+        $grant->disableRequireCodeChallengeForPublicClients();
       }
     }
     // Enable the grant on the server with a token TTL of X hours.
