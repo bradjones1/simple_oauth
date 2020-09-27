@@ -4,6 +4,7 @@ namespace Drupal\simple_oauth\Normalizer;
 
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\serialization\Normalizer\NormalizerBase;
 use Drupal\simple_oauth\Entities\UserEntityWithClaims;
@@ -23,14 +24,21 @@ class UserClaimsNormalizer extends NormalizerBase implements NormalizerInterface
    *
    * @var \Drupal\user\UserStorageInterface
    */
-  private $userStorage;
+  protected $userStorage;
 
   /**
    * The claims.
    *
    * @var string[]
    */
-  private $claims;
+  protected $claims;
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * UserClaimsNormalizer constructor.
@@ -39,12 +47,16 @@ class UserClaimsNormalizer extends NormalizerBase implements NormalizerInterface
    *   The entity type manager.
    * @param string[] $claims
    *   The list of claims being selected.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, array $claims) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, array $claims, ModuleHandlerInterface $module_handler) {
     $this->userStorage = $entity_type_manager->getStorage('user');
     $this->claims = $claims;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -86,6 +98,8 @@ class UserClaimsNormalizer extends NormalizerBase implements NormalizerInterface
     if ($account instanceof EntityChangedInterface) {
       $claim_values['updated_at'] = $account->getChangedTime();
     }
+    $context = ['account' => $account, 'claims' => $this->claims];
+    $this->moduleHandler->alter('simple_oauth_oidc_claims', $claim_values, $context);
     return array_intersect_key($claim_values, array_flip($this->claims));
   }
 
