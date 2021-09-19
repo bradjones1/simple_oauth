@@ -13,6 +13,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Site\Settings;
 use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
@@ -149,12 +150,19 @@ class Oauth2GrantManager extends DefaultPluginManager implements Oauth2GrantMana
       throw OAuthServerException::serverError('Hash salt must be at least 32 characters long.');
     }
 
+    // Initialize the crypto key, optionally disabling the permissions check.
+    $crypt_key = new CryptKey(
+      $this->fileSystem()->realpath($this->privateKeyPath),
+      NULL,
+      Settings::get('simple_oauth.key_permissions_check', TRUE)
+    );
+
     if (empty($this->server)) {
       $this->server = new AuthorizationServer(
         $this->clientRepository,
         $this->accessTokenRepository,
         $this->scopeRepository,
-        $this->fileSystem()->realpath($this->privateKeyPath),
+        $crypt_key,
         Core::ourSubstr($salt, 0, 32),
         $this->responseType
       );

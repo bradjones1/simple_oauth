@@ -4,6 +4,8 @@ namespace Drupal\simple_oauth\Server;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Site\Settings;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use League\OAuth2\Server\ResourceServer as LeageResourceServer;
 use Symfony\Bridge\PsrHttpMessage\HttpFoundationFactoryInterface;
@@ -57,9 +59,16 @@ class ResourceServer implements ResourceServerInterface {
         ->get('public_key');
       $public_key_real = $this->fileSystem()->realpath($public_key);
       if ($public_key && $public_key_real) {
+        // Initialize the crypto key, optionally disabling the permissions
+        // check.
+        $crypt_key = new CryptKey(
+          $public_key_real,
+          NULL,
+          Settings::get('simple_oauth.key_permissions_check', TRUE)
+        );
         $this->subject = new LeageResourceServer(
           $access_token_repository,
-          $public_key_real
+          $crypt_key
         );
       }
     } catch (\LogicException $exception) {
