@@ -131,12 +131,12 @@ class PasswordFunctionalTest extends TokenBearerFunctionalTestBase {
         'code' => 401,
       ],
       'username' => [
-        'error' => 'invalid_credentials',
-        'code' => 401,
+        'error' => 'invalid_grant',
+        'code' => 400,
       ],
       'password' => [
-        'error' => 'invalid_credentials',
-        'code' => 401,
+        'error' => 'invalid_grant',
+        'code' => 400,
       ],
     ];
     foreach ($data as $key => $value) {
